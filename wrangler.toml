@@ -1,0 +1,22 @@
+name = "farmpulse"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+
+[vars]
+APP_NAME = "FarmPulse"
+APP_VERSION = "0.1.0"
+ENVIRONMENT = "development"
+
+# Bindings are added after Cloudflare resources are created.
+# Example:
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "farmpulse-db"
+# database_id = "REPLACE_AFTER_CREATION"
+#
+# [[r2_buckets]]
+# binding = "ATTACHMENTS"
+# bucket_name = "farmpulse-attachments"
+#
+# [triggers]
+# crons = ["0 */3 * * *"]
