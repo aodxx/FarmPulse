@@ -8,6 +8,11 @@ APP_NAME = "FarmPulse"
 APP_VERSION = "0.1.0"
 ENVIRONMENT = "production"
 
+# Cloudflare agent tracing / Workers tracing.
+# Agent activity will appear alongside Worker runtime operations in Cloudflare Observability.
+[observability.traces]
+enabled = true
+
 # Bindings are added after Cloudflare resources are created.
 # Example:
 # [[d1_databases]]
