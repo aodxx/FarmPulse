@@ -1,11 +1,12 @@
 name = "farmpulse"
 main = "src/index.ts"
 compatibility_date = "2026-09-01"
+account_id = "2addc1ce7db4af91c9067ee2a8bba7f0"
 
 [vars]
 APP_NAME = "FarmPulse"
 APP_VERSION = "0.1.0"
-ENVIRONMENT = "development"
+ENVIRONMENT = "production"
 
 # Bindings are added after Cloudflare resources are created.
 # Example:
