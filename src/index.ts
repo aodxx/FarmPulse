@@ -177,13 +177,111 @@ async function handleDefaultFarm(request: Request, env: Env): Promise<Response> 
   return apiError(405, "METHOD_NOT_ALLOWED", "Method not allowed");
 }
 
-const landingPage = `<!doctype html>
-<html lang="th"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="theme-color" content="#0f5132" /><title>FarmPulse</title><style>
-:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#16231b;background:#f5f8f5}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px}main{width:min(100%,560px);background:white;border-radius:24px;padding:28px;box-shadow:0 14px 45px rgba(20,50,30,.10)}.badge{display:inline-block;padding:7px 11px;border-radius:999px;background:#e5f4e9;font-weight:700;font-size:14px}h1{font-size:clamp(34px,8vw,52px);margin:16px 0 6px;line-height:1}p{font-size:18px;line-height:1.55;color:#4d5e53}.flow{margin-top:24px;padding:18px;border-radius:18px;background:#f1f6f2;font-weight:700;line-height:1.8}
-</style></head><body><main><span class="badge">Phase 2 — D1 Database</span><h1>FarmPulse</h1>
-<p>ผู้ช่วยวางแผนงานสวนจากสภาพอากาศ เปลี่ยนข้อมูลพยากรณ์ให้เป็นคำแนะนำที่ใช้ตัดสินใจทำงานในสวนได้จริง</p>
-<div class="flow">Weather → Farm Context → Rules → Recommendation → Planning → Farm Log</div></main></body></html>`;
+const landingPage = \`<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14532d">
+<title>FarmPulse — ผู้ช่วยจัดการสวน</title>
+<style>
+:root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#17251c;background:#f3f7f3;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(180deg,#14532d 0,#1d6a3a 220px,#f3f7f3 220px);font-size:17px}
+button,input,select,textarea{font:inherit}button{cursor:pointer}.shell{width:min(100%,760px);margin:auto;padding:22px 16px 96px}
+.top{color:#fff;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:12px}.logo{width:52px;height:52px;border-radius:17px;background:#facc15;display:grid;place-items:center;font-size:28px;box-shadow:0 8px 24px #0b2e1c55}.brand h1{font-size:27px;line-height:1;margin:0}.brand small{display:block;margin-top:5px;color:#d7f2df}.status{white-space:nowrap;border:1px solid #ffffff40;background:#ffffff18;border-radius:999px;padding:8px 11px;font-size:14px;font-weight:800}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#86efac;margin-right:6px}
+.hero,.card{background:#fff;border:1px solid #dce8de;border-radius:24px;box-shadow:0 12px 34px #173e2512}.hero{padding:24px;margin-bottom:16px}.eyebrow{font-size:13px;font-weight:900;color:#287348;letter-spacing:.08em}.hero h2{font-size:clamp(28px,7vw,40px);line-height:1.12;margin:8px 0 10px}.hero p{color:#536459;line-height:1.55;margin:0}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:20px}.stat{border-radius:17px;background:#eff7f0;padding:13px 10px;text-align:center}.stat b{display:block;color:#166534;font-size:22px}.stat span{font-size:12px;color:#607066}
+.card{padding:20px;margin-top:16px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.section-head h3{font-size:22px;margin:0}.primary,.secondary,.location{border:0;border-radius:14px;font-weight:800;padding:12px 15px}.primary{background:#166534;color:#fff;box-shadow:0 7px 18px #16653425}.secondary{background:#e9f5ec;color:#14532d}.location{width:100%;background:#edf7ef;color:#166534;margin-top:4px}
+.empty{text-align:center;padding:30px 14px;border:2px dashed #cfe0d2;border-radius:19px;color:#607066}.empty-icon{font-size:43px}.empty b{display:block;color:#213529;font-size:19px;margin:8px}
+.farm{border:1px solid #dce7de;border-radius:18px;padding:16px;margin-top:11px;display:grid;grid-template-columns:1fr auto;gap:8px;background:#fff}.farm h4{font-size:19px;margin:0 0 6px}.meta{color:#66756b;font-size:14px;line-height:1.6}.tag{align-self:start;background:#e7f5eb;color:#166534;padding:6px 9px;border-radius:999px;font-size:12px;font-weight:900}.default{background:#fef3c7;color:#854d0e}.farm-actions{grid-column:1/-1;border-top:1px solid #edf2ee;padding-top:10px;margin-top:4px}.farm-actions button{border:0;background:transparent;color:#166534;font-weight:800;padding:5px 0}
+dialog{width:min(calc(100% - 24px),560px);max-height:90vh;border:0;border-radius:25px;padding:0;box-shadow:0 24px 80px #0005}dialog::backdrop{background:#07180d99}.modal{padding:22px}.modal-head{display:flex;justify-content:space-between;align-items:center}.modal h3{font-size:24px;margin:0}.close{border:0;background:#edf2ee;border-radius:50%;width:42px;height:42px;font-size:24px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{margin-top:14px}.field.full{grid-column:1/-1}.field label{font-weight:800;font-size:14px;display:block;margin-bottom:7px}.field input,.field select,.field textarea{width:100%;border:1px solid #cbd9ce;border-radius:13px;padding:13px;background:#fff;color:#17251c}.field input:focus,.field select:focus{outline:3px solid #bbf7d0;border-color:#22c55e}.hint{font-size:13px;color:#68776d;margin:10px 0}.save{width:100%;margin-top:18px;padding:15px}.notice{display:none;border-radius:14px;padding:12px;margin:12px 0 0;font-weight:700}.notice.show{display:block}.notice.ok{background:#dcfce7;color:#166534}.notice.error{background:#fee2e2;color:#991b1b}.footer{text-align:center;color:#718077;font-size:13px;margin-top:24px}
+@media(max-width:480px){body{font-size:16px}.top{align-items:flex-start}.status{font-size:12px}.stats{grid-template-columns:1fr 1fr}.stats .stat:last-child{grid-column:1/-1}.grid{grid-template-columns:1fr}.field.full{grid-column:auto}.hero,.card{border-radius:21px}.shell{padding-top:16px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="top"><div class="brand"><div class="logo">🌱</div><div><h1>FarmPulse</h1><small>ผู้ช่วยจัดการสวนของคุณ</small></div></div><div class="status"><i class="dot"></i><span id="systemState">กำลังตรวจสอบ</span></div></header>
+<main>
+<section class="hero">
+<div class="eyebrow">FARMPULSE • PHASE 2</div>
+<h2>เริ่มต้นจากข้อมูลสวน<br>เพื่อวางแผนได้แม่นยำขึ้น</h2>
+<p>เพิ่มสวนและตำแหน่งของคุณ ระบบจะใช้ข้อมูลนี้ร่วมกับสภาพอากาศเพื่อเตรียมคำแนะนำงานสวนในขั้นถัดไป</p>
+<div class="stats">
+<div class="stat"><b id="appVersion">—</b><span>เวอร์ชัน</span></div>
+<div class="stat"><b id="dbState">—</b><span>ฐานข้อมูล</span></div>
+<div class="stat"><b id="farmCount">—</b><span>สวนทั้งหมด</span></div>
+</div>
+</section>
+<section class="card">
+<div class="section-head"><h3>สวนของฉัน</h3><button class="primary" id="openForm">＋ เพิ่มสวน</button></div>
+<div id="notice" class="notice"></div>
+<div id="farmList"><div class="empty"><div class="empty-icon">⏳</div><b>กำลังโหลดข้อมูล</b></div></div>
+</section>
+<div class="footer">ข้อมูลจัดเก็บใน Cloudflare D1 • เขตเวลาไทย</div>
+</main>
+</div>
+<dialog id="farmDialog">
+<form class="modal" id="farmForm">
+<div class="modal-head"><h3>เพิ่มข้อมูลสวน</h3><button class="close" type="button" id="closeForm" aria-label="ปิด">×</button></div>
+<div class="grid">
+<div class="field full"><label for="farmName">ชื่อสวน *</label><input id="farmName" name="name" maxlength="120" placeholder="เช่น สวนนิพนธ์" required></div>
+<div class="field"><label for="cropType">ประเภทพืช *</label><select id="cropType" name="crop_type"><option value="rubber">ยางพารา</option><option value="oil_palm">ปาล์มน้ำมัน</option><option value="mixed">สวนผสม</option><option value="generic">อื่น ๆ</option></select></div>
+<div class="field"><label for="areaRai">พื้นที่ (ไร่)</label><input id="areaRai" name="area_rai" type="number" min="0" step="0.01" placeholder="เช่น 12"></div>
+<div class="field"><label for="latitude">ละติจูด *</label><input id="latitude" name="latitude" type="number" min="-90" max="90" step="any" placeholder="7.617" required></div>
+<div class="field"><label for="longitude">ลองจิจูด *</label><input id="longitude" name="longitude" type="number" min="-180" max="180" step="any" placeholder="100.074" required></div>
+<div class="field full"><button class="location" type="button" id="useLocation">📍 ใช้ตำแหน่งปัจจุบันของฉัน</button><div class="hint" id="locationHint">เบราว์เซอร์จะขออนุญาตใช้ตำแหน่งเฉพาะตอนกดปุ่มนี้</div></div>
+<div class="field full"><label for="notes">หมายเหตุ</label><textarea id="notes" name="notes" rows="2" maxlength="1000" placeholder="ข้อมูลเพิ่มเติมเกี่ยวกับสวน"></textarea></div>
+</div>
+<div id="formNotice" class="notice"></div>
+<button class="primary save" id="saveFarm" type="submit">บันทึกสวน</button>
+</form>
+</dialog>
+<script>
+(function(){
+var dialog=document.getElementById("farmDialog"),list=document.getElementById("farmList"),notice=document.getElementById("notice"),formNotice=document.getElementById("formNotice");
+var crops={rubber:"ยางพารา",oil_palm:"ปาล์มน้ำมัน",mixed:"สวนผสม",generic:"อื่น ๆ"};
+function show(el,msg,type){el.textContent=msg;el.className="notice show "+type}
+function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(s){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[s]})}
+async function load(){
+try{
+var responses=await Promise.all([fetch("/api/health"),fetch("/api/db/health"),fetch("/api/farms")]);
+var health=await responses[0].json(),db=await responses[1].json(),farms=await responses[2].json();
+document.getElementById("systemState").textContent=health.ok?"ระบบพร้อม":"ระบบขัดข้อง";
+document.getElementById("appVersion").textContent=health.version||"—";
+document.getElementById("dbState").textContent=db.ok?"พร้อม":"ขัดข้อง";
+document.getElementById("farmCount").textContent=(farms.farms||[]).length;
+render(farms.farms||[],farms.default_farm_id);
+}catch(e){document.getElementById("systemState").textContent="เชื่อมต่อไม่ได้";list.innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><b>โหลดข้อมูลไม่สำเร็จ</b><span>ลองเปิดหน้านี้ใหม่อีกครั้ง</span></div>'}
+}
+function render(farms,defaultId){
+if(!farms.length){list.innerHTML='<div class="empty"><div class="empty-icon">🌿</div><b>ยังไม่มีข้อมูลสวน</b><span>กด “เพิ่มสวน” เพื่อเริ่มใช้งาน FarmPulse</span></div>';return}
+list.innerHTML=farms.map(function(f){
+var isDefault=f.id===defaultId;
+return '<article class="farm"><div><h4>'+esc(f.name)+'</h4><div class="meta">'+esc(crops[f.crop_type]||f.crop_type)+(f.area_rai!=null?' • '+esc(f.area_rai)+' ไร่':'')+'<br>พิกัด '+Number(f.latitude).toFixed(4)+', '+Number(f.longitude).toFixed(4)+'</div></div><span class="tag '+(isDefault?'default':'')+'">'+(isDefault?'สวนหลัก':'ใช้งานอยู่')+'</span>'+(isDefault?'':'<div class="farm-actions"><button data-default="'+esc(f.id)+'">ตั้งเป็นสวนหลัก</button></div>')+'</article>'
+}).join("");
+list.querySelectorAll("[data-default]").forEach(function(btn){btn.addEventListener("click",async function(){
+btn.disabled=true;
+try{var r=await fetch("/api/settings/default-farm",{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({farm_id:btn.getAttribute("data-default")})});if(!r.ok)throw new Error();show(notice,"ตั้งเป็นสวนหลักเรียบร้อย","ok");load()}catch(e){show(notice,"ตั้งสวนหลักไม่สำเร็จ กรุณาลองใหม่","error")}finally{btn.disabled=false}
+})})
+}
+document.getElementById("openForm").onclick=function(){formNotice.className="notice";dialog.showModal()};
+document.getElementById("closeForm").onclick=function(){dialog.close()};
+dialog.addEventListener("click",function(e){if(e.target===dialog)dialog.close()});
+document.getElementById("useLocation").onclick=function(){
+var hint=document.getElementById("locationHint");if(!navigator.geolocation){hint.textContent="อุปกรณ์นี้ไม่รองรับการอ่านตำแหน่ง";return}
+hint.textContent="กำลังค้นหาตำแหน่ง…";
+navigator.geolocation.getCurrentPosition(function(p){document.getElementById("latitude").value=p.coords.latitude.toFixed(6);document.getElementById("longitude").value=p.coords.longitude.toFixed(6);hint.textContent="ใส่ตำแหน่งปัจจุบันให้แล้ว"},function(){hint.textContent="ไม่สามารถอ่านตำแหน่งได้ กรุณากรอกพิกัดเอง"},{enableHighAccuracy:true,timeout:12000})
+};
+document.getElementById("farmForm").addEventListener("submit",async function(e){
+e.preventDefault();var b=document.getElementById("saveFarm");b.disabled=true;b.textContent="กำลังบันทึก…";formNotice.className="notice";
+var fd=new FormData(e.target),area=fd.get("area_rai");
+var payload={name:fd.get("name"),crop_type:fd.get("crop_type"),latitude:Number(fd.get("latitude")),longitude:Number(fd.get("longitude")),area_rai:area===""?null:Number(area),timezone:"Asia/Bangkok",notes:fd.get("notes")||null};
+try{var r=await fetch("/api/farms",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});var data=await r.json();if(!r.ok)throw new Error(data.message||"บันทึกไม่สำเร็จ");e.target.reset();dialog.close();show(notice,"เพิ่มสวนเรียบร้อยแล้ว","ok");await load()}catch(err){show(formNotice,err.message||"บันทึกไม่สำเร็จ","error")}finally{b.disabled=false;b.textContent="บันทึกสวน"}
+});
+load();
+})();
+</script>
+</body>
+</html>\`;
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
