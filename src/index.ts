@@ -1,4 +1,5 @@
 import { authPage, getSessionUser, handleAuth, sameOrigin, type SessionUser } from "./auth";
+import { iconSvg, manifest, pwaRegistration, serviceWorker } from "./pwa";
 
 export interface Env {
   APP_NAME: string;
@@ -190,7 +191,7 @@ const landingPage = `<!doctype html>
 :root{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#17251c;background:#f3f7f3;font-synthesis:none}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(180deg,#14532d 0,#1d6a3a 220px,#f3f7f3 220px);font-size:17px}
 button,input,select,textarea{font:inherit}button{cursor:pointer}.shell{width:min(100%,760px);margin:auto;padding:22px 16px 96px}
-.top{color:#fff;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:12px}.logo{width:52px;height:52px;border-radius:17px;background:#facc15;display:grid;place-items:center;font-size:28px;box-shadow:0 8px 24px #0b2e1c55}.brand h1{font-size:27px;line-height:1;margin:0}.brand small{display:block;margin-top:5px;color:#d7f2df}.status{white-space:nowrap;border:1px solid #ffffff40;background:#ffffff18;border-radius:999px;padding:8px 11px;font-size:14px;font-weight:800}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#86efac;margin-right:6px}
+.top{color:#fff;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:12px}.logo{width:52px;height:52px;border-radius:17px;background:#facc15;display:grid;place-items:center;font-size:28px;box-shadow:0 8px 24px #0b2e1c55}.brand h1{font-size:27px;line-height:1;margin:0}.brand small{display:block;margin-top:5px;color:#d7f2df}.head-actions{display:flex;align-items:center;gap:7px}.status{white-space:nowrap;border:1px solid #ffffff40;background:#ffffff18;border-radius:999px;padding:8px 11px;font-size:14px;font-weight:800}.logout{border:1px solid #ffffff40;background:#ffffff18;color:#fff;border-radius:12px;padding:8px 10px;font-size:13px;font-weight:800}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#86efac;margin-right:6px}
 .hero,.card{background:#fff;border:1px solid #dce8de;border-radius:24px;box-shadow:0 12px 34px #173e2512}.hero{padding:24px;margin-bottom:16px}.eyebrow{font-size:13px;font-weight:900;color:#287348;letter-spacing:.08em}.hero h2{font-size:clamp(28px,7vw,40px);line-height:1.12;margin:8px 0 10px}.hero p{color:#536459;line-height:1.55;margin:0}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:20px}.stat{border-radius:17px;background:#eff7f0;padding:13px 10px;text-align:center}.stat b{display:block;color:#166534;font-size:22px}.stat span{font-size:12px;color:#607066}
 .card{padding:20px;margin-top:16px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.section-head h3{font-size:22px;margin:0}.primary,.secondary,.location{border:0;border-radius:14px;font-weight:800;padding:12px 15px}.primary{background:#166534;color:#fff;box-shadow:0 7px 18px #16653425}.secondary{background:#e9f5ec;color:#14532d}.location{width:100%;background:#edf7ef;color:#166534;margin-top:4px}
 .empty{text-align:center;padding:30px 14px;border:2px dashed #cfe0d2;border-radius:19px;color:#607066}.empty-icon{font-size:43px}.empty b{display:block;color:#213529;font-size:19px;margin:8px}
@@ -201,7 +202,7 @@ dialog{width:min(calc(100% - 24px),560px);max-height:90vh;border:0;border-radius
 </head>
 <body>
 <div class="shell">
-<header class="top"><div class="brand"><div class="logo">🌱</div><div><h1>FarmPulse</h1><small>ผู้ช่วยจัดการสวนของคุณ</small></div></div><div class="status"><i class="dot"></i><span id="systemState">กำลังตรวจสอบ</span></div></header>
+<header class="top"><div class="brand"><div class="logo">🌱</div><div><h1>FarmPulse</h1><small>ผู้ช่วยจัดการสวนของคุณ</small></div></div><div class="head-actions"><div class="status"><i class="dot"></i><span id="systemState">กำลังตรวจสอบ</span></div><button class="logout" id="logout" type="button">ออก</button></div></header>
 <main>
 <section class="hero">
 <div class="eyebrow">FARMPULSE • PHASE 2</div>
@@ -265,6 +266,9 @@ btn.disabled=true;
 try{var r=await fetch("/api/settings/default-farm",{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({farm_id:btn.getAttribute("data-default")})});if(!r.ok)throw new Error();show(notice,"ตั้งเป็นสวนหลักเรียบร้อย","ok");load()}catch(e){show(notice,"ตั้งสวนหลักไม่สำเร็จ กรุณาลองใหม่","error")}finally{btn.disabled=false}
 })})
 }
+document.getElementById("logout").onclick=async function(){try{await fetch("/api/auth/logout",{method:"POST"});if(navigator.serviceWorker&&navigator.serviceWorker.controller)navigator.serviceWorker.controller.postMessage({type:"CLEAR_PRIVATE_CACHE"});location.replace("/")}catch(e){show(notice,"ออกจากระบบไม่สำเร็จ กรุณาลองใหม่","error")}};
+function connectionState(){if(!navigator.onLine){document.getElementById("systemState").textContent="ออฟไลน์ • ข้อมูลล่าสุด"}}
+window.addEventListener("online",load);window.addEventListener("offline",connectionState);connectionState();
 document.getElementById("openForm").onclick=function(){formNotice.className="notice";dialog.showModal()};
 document.getElementById("closeForm").onclick=function(){dialog.close()};
 dialog.addEventListener("click",function(e){if(e.target===dialog)dialog.close()});
@@ -289,6 +293,15 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     try {
+      if (url.pathname === "/manifest.webmanifest") {
+        return new Response(manifest, { headers: { "content-type": "application/manifest+json; charset=utf-8", "cache-control": "public, max-age=3600" } });
+      }
+      if (url.pathname === "/sw.js") {
+        return new Response(serviceWorker, { headers: { "content-type": "text/javascript; charset=utf-8", "cache-control": "no-cache", "service-worker-allowed": "/" } });
+      }
+      if (url.pathname === "/icon.svg") {
+        return new Response(iconSvg, { headers: { "content-type": "image/svg+xml; charset=utf-8", "cache-control": "public, max-age=86400" } });
+      }
       if (url.pathname === "/api/health") {
         return json({ ok: true, app: env.APP_NAME || "FarmPulse", version: env.APP_VERSION || "0.2.0", environment: env.ENVIRONMENT || "development", timestamp: new Date().toISOString() });
       }
@@ -304,7 +317,7 @@ export default {
         if (url.pathname.startsWith("/api/")) {
           return apiError(401, "AUTH_REQUIRED", "กรุณาเข้าสู่ระบบ FarmPulse");
         }
-        return new Response(authPage, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
+        return new Response(authPage.replace("</head>", pwaRegistration + "</head>"), { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
       }
       if (request.method !== "GET" && request.method !== "HEAD" && !sameOrigin(request)) {
         return apiError(403, "INVALID_ORIGIN", "คำขอนี้ไม่ได้มาจาก FarmPulse");
@@ -315,7 +328,7 @@ export default {
       if (farmMatch) return handleFarms(request, env, user, farmMatch[1]);
       if (url.pathname === "/api/settings/default-farm") return handleDefaultFarm(request, env, user);
       if (url.pathname.startsWith("/api/")) return apiError(404, "NOT_FOUND", "FarmPulse API route not found");
-      return new Response(landingPage, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
+      return new Response(landingPage.replace("</head>", pwaRegistration + "</head>"), { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
     } catch (error) {
       console.error("Unhandled request error", error);
       return apiError(500, "INTERNAL_ERROR", "FarmPulse could not complete this request");
