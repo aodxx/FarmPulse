@@ -50,7 +50,7 @@ const hashPin = async (pin: string, salt: Uint8Array, iterations: number) => {
     ["deriveBits"],
   );
   const bits = await crypto.subtle.deriveBits(
-    { name: "PBKDF2", hash: "SHA-256", salt, iterations },
+    { name: "PBKDF2", hash: "SHA-256", salt: Uint8Array.from(salt).buffer, iterations },
     material,
     256,
   );
