@@ -4,7 +4,7 @@ Last updated: 2026-09-02
 
 ## Current Phase
 
-Phase 1 — Initial Cloudflare Worker deployment complete
+Phase 2 — D1 database implementation ready for production provisioning
 
 ## Completed
 
@@ -26,19 +26,30 @@ Phase 1 — Initial Cloudflare Worker deployment complete
 - Landing page verified with HTTP 200
 - Health endpoint verified with HTTP 200 JSON
 - No secret values committed
+- Versioned D1 migration `0001_initial.sql` added
+- D1 binding configuration and idempotent CI provisioning added
+- Local migration verified successfully (21 SQL commands)
+- Farm create/list/read/update API implemented with validation and prepared statements
+- Default farm selection API implemented
+- Database-backed `/api/db/health` endpoint implemented
+- Remote migration, schema verification, deploy, and health checks added to GitHub Actions
 
 ## Production
 
 - Application: https://farmpulse.farmpulse-aodxx-th.workers.dev
 - Health: https://farmpulse.farmpulse-aodxx-th.workers.dev/api/health
 - Worker: `farmpulse`
-- Version: `0.1.0`
+- Version: `0.2.0` (pending Phase 2 production deployment)
 - Environment: `production`
 - Cloudflare version ID: `75427ebe-48d2-4616-af8f-214a801347f1`
 
+## Awaiting Production Verification
+
+- Cloudflare D1 database creation using the connected account
+- Remote migration and database-backed health check
+
 ## Not Yet Connected
 
-- Cloudflare D1 database
 - Cloudflare R2 bucket
 - Open-Meteo runtime integration
 - ntfy topic/notification flow
@@ -46,4 +57,4 @@ Phase 1 — Initial Cloudflare Worker deployment complete
 
 ## Next Milestone
 
-Phase 2 — create and bind Cloudflare D1 database `farmpulse-db`, apply `db/schema.sql`, and verify the first database-backed health check.
+Complete the Phase 2 production run, verify the D1 database and indexes, then create and retrieve the first real farm record before closing Phase 2.

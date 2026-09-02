@@ -5,8 +5,14 @@ account_id = "2addc1ce7db4af91c9067ee2a8bba7f0"
 
 [vars]
 APP_NAME = "FarmPulse"
-APP_VERSION = "0.1.0"
+APP_VERSION = "0.2.0"
 ENVIRONMENT = "production"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "farmpulse-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
 
 # Cloudflare agent tracing / Workers tracing.
 # Agent activity will appear alongside Worker runtime operations in Cloudflare Observability.
@@ -14,12 +20,8 @@ ENVIRONMENT = "production"
 enabled = true
 
 # Bindings are added after Cloudflare resources are created.
-# Example:
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "farmpulse-db"
-# database_id = "REPLACE_AFTER_CREATION"
-#
+# The D1 ID above is replaced from the live Cloudflare account during CI.
+# Example future binding:
 # [[r2_buckets]]
 # binding = "ATTACHMENTS"
 # bucket_name = "farmpulse-attachments"

@@ -44,7 +44,7 @@ FarmPulse is not a generic weather app. Every forecast must be translated into a
 
 - Phase 0 — Foundation ✅
 - Phase 1 — Worker Hello World ✅
-- Phase 2 — D1 database
+- Phase 2 — D1 database 🚧
 - Phase 3 — Open-Meteo integration
 - Phase 4 — Farm Rules Engine
 - Phase 5 — Planner + Farm Log
@@ -54,3 +54,17 @@ FarmPulse is not a generic weather app. Every forecast must be translated into a
 - Phase 9 — Workers AI assistant
 
 See `PRD.md`, `docs/ARCHITECTURE.md`, `docs/ROADMAP.md`, and `db/schema.sql` for implementation details.
+
+## Phase 2 API
+
+- `GET /api/db/health` — verify the D1 binding and schema
+- `GET /api/farms` — list active farms (`?active=all` includes inactive farms)
+- `POST /api/farms` — create a farm
+- `GET /api/farms/:id` — retrieve one farm
+- `PATCH /api/farms/:id` — update or deactivate a farm
+- `GET /api/settings/default-farm` — retrieve the default farm
+- `PUT /api/settings/default-farm` — select the default farm
+
+Database changes are versioned in `migrations/`. GitHub Actions provisions `farmpulse-db`
+idempotently, applies pending migrations, verifies the remote schema, deploys the Worker,
+and checks both application and database health endpoints.

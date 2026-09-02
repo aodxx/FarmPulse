@@ -78,6 +78,8 @@ GET    /api/farms
 POST   /api/farms
 GET    /api/farms/:id
 PATCH  /api/farms/:id
+GET    /api/settings/default-farm
+PUT    /api/settings/default-farm
 
 GET    /api/farms/:id/weather
 POST   /api/farms/:id/weather/refresh
@@ -93,6 +95,16 @@ POST   /api/logs
 POST   /api/attachments
 GET    /api/analytics/summary
 ```
+
+## D1 Migration and Deployment
+
+- Schema changes are stored as ordered SQL files in `migrations/`.
+- Local checks apply all pending migrations to Wrangler's local D1 instance.
+- Deployment lists account databases and creates `farmpulse-db` only when it is absent.
+- CI resolves the live database UUID into the Worker binding without committing account-generated IDs.
+- Pending remote migrations run before the Worker is deployed.
+- Deployment stops if fewer than the expected application tables are present.
+- Production checks verify both `/api/health` and `/api/db/health`.
 
 ## Weather Cache Strategy
 

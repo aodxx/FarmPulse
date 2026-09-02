@@ -1,14 +1,15 @@
 {
   "name": "farmpulse",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
-    "db:local": "wrangler d1 execute farmpulse-db --local --file=db/schema.sql",
-    "db:remote": "wrangler d1 execute farmpulse-db --remote --file=db/schema.sql"
+    "db:local": "wrangler d1 migrations apply DB --local",
+    "db:remote": "wrangler d1 migrations apply DB --remote",
+    "db:verify:local": "wrangler d1 execute DB --local --command=\"SELECT name FROM sqlite_master WHERE type='table' ORDER BY name\""
   },
   "devDependencies": {
     "@cloudflare/workers-types": "latest",
