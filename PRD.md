@@ -1,291 +1,262 @@
-# FarmPulse — Product Requirements Document
+# FarmPulse — Product Requirements Document v2.0
 
-## 1. Product Vision
+## 1. Product Mission
 
-FarmPulse is a mobile-first farm operations assistant that converts local weather forecasts and farm context into practical recommendations, schedules, alerts, and a historical work log.
+FarmPulse is a mobile-first field assistant for Thai farmers. It converts location-specific weather and verified farm rules into understandable work recommendations, then records what the farmer actually did and what happened.
 
-The primary product promise is simple:
+The product promise is:
 
-> Do not merely show the weather. Tell the farmer what work is suitable, risky, or should be postponed — and record what actually happened.
+> ไม่แค่บอกอากาศ แต่ช่วยตอบว่า วันนี้ควรทำอะไร ควรเลื่อนอะไร เพราะเหตุใด และผลจริงเป็นอย่างไร
 
-## 2. Initial Scope
+FarmPulse must become a dependable working tool, not a technology demonstration.
 
-The first production target focuses on a single user managing one or more farms. The architecture must support multiple farms and crop types from the beginning without forcing multi-user complexity into the first release.
+## 2. First Production User
 
-Initial crop focus:
-- Rubber
-- Oil palm
-- Generic mixed-farm activities
+The first validated release focuses on:
 
-The rules engine must remain extensible for other crops later.
+- an owner or operator of 1–3 rubber farms,
+- working in Southern Thailand,
+- using an Android phone and a normal mobile browser,
+- sometimes working with weak or intermittent connectivity,
+- and preferring large, direct Thai-language actions over spreadsheet-style forms.
 
-## 3. Target User
+Oil palm and mixed farms remain supported by the data model, but crop-specific recommendations must not be launched until their own rule packs pass validation.
 
-A farm owner or operator using a smartphone in the field who needs:
-- quick weather-aware decisions,
-- a simple work plan,
-- reminders,
-- an activity and expense record,
-- evidence photos,
-- and useful history without spreadsheet-style data entry.
+## 3. Jobs to Be Done
 
-## 4. Core User Problems
+The first release must reduce the effort needed to answer:
 
-1. Weather forecasts are available, but they do not directly answer whether a farm task should be done.
-2. Farm work is often remembered informally and is difficult to review later.
-3. Weather, plans, actual work, expenses, and evidence images are usually separated.
-4. Repeated farm decisions can benefit from consistent rules instead of memory alone.
+1. คืนนี้หรือพรุ่งนี้เหมาะกับการกรีดยางหรือไม่
+2. ฝนอาจมาในช่วงเวลาใด และข้อมูลใหม่แค่ไหน
+3. งานใดควรทำ งานใดควรเลื่อน
+4. วันนี้ทำอะไรไปแล้ว ได้ผลอย่างไร และเสียค่าใช้จ่ายเท่าไร
+5. คำแนะนำก่อนหน้าตรงกับสิ่งที่เกิดขึ้นจริงหรือไม่
 
-## 5. Product Principles
+## 4. Product Principles
 
-1. Mobile first.
-2. Important information should be readable outdoors and at a glance.
-3. Recommendations must explain why they are green/yellow/red.
-4. Weather data and rule outputs must remain distinguishable from human-entered farm records.
-5. No AI is required for core decisions; deterministic rules come first.
-6. AI may summarize or explain later, but must not silently replace the rules engine.
-7. Free-tier efficiency is a design requirement.
-8. Store only data that is useful to farm decisions or history.
+1. Mobile first and readable outdoors.
+2. The home screen answers the next useful action within a few seconds.
+3. Weather forecasts are uncertain signals, not guaranteed facts.
+4. Every recommendation shows status, reason, relevant metrics, forecast freshness, confidence/uncertainty and rule version.
+5. Deterministic, testable rules decide status. AI may explain but never silently override rules.
+6. Crop rules require traceable sources and field validation.
+7. The app remains useful on weak connections and never presents stale data as current.
+8. Farm data belongs to the farmer and must be protected, exportable and recoverable.
+9. Free-tier efficiency is required for the pilot, but free forever is not a product promise.
+10. New features are accepted only when they improve a real farmer workflow.
 
-## 6. Main Navigation
+## 5. Initial Scope
 
-- Home
-- Planner
-- Add / Log
-- Weather
-- Profile / Settings
+### In scope
 
-## 7. Functional Requirements
+- secure owner account,
+- one owner managing one or more farms,
+- rubber-first weather and recommendation experience,
+- current/hourly/daily forecast with freshness,
+- three or more validated rubber-work recommendations,
+- task planning,
+- fast activity/expense log,
+- offline-readable dashboard and queued farm logs,
+- optional evidence photos,
+- useful alerts,
+- CSV/JSON export,
+- pilot feedback and recommendation outcome tracking.
 
-### 7.1 Dashboard
+### Out of scope for the first pilot
 
-Show:
+- public registration without an invite or controlled onboarding,
+- marketplace or social feed,
+- payroll,
+- complex team roles,
+- subscription billing,
+- autonomous agronomy AI,
+- broad crop recommendations without validation.
+
+## 6. Core Mobile Experience
+
+### 6.1 Home
+
+The first screen must show:
+
 - selected farm,
-- current/next-period weather summary,
-- rain probability,
-- temperature,
-- humidity where available,
-- wind speed,
-- today's task suitability,
+- data freshness and connection/offline state,
+- rain timing and probability,
+- current/forecast temperature, humidity and wind,
+- prominent today/tonight/tomorrow recommendation,
+- GOOD / CAUTION / NOT_RECOMMENDED / UNKNOWN status using text and icons,
+- short reason and expandable evidence,
 - today's planned work,
-- important alerts.
+- one-tap “บันทึกว่าทำแล้ว” and “เลื่อนงาน”.
 
-Recommendation states:
-- GOOD
-- CAUTION
-- NOT_RECOMMENDED
-- UNKNOWN
+### 6.2 My Farms
 
-Every recommendation must contain:
-- status,
-- short reason,
-- relevant weather metrics,
-- evaluated timestamp,
-- rule version.
+A farm stores:
 
-### 7.2 My Farms
-
-Each farm stores:
+- owner,
 - name,
 - crop type,
-- latitude,
-- longitude,
-- area in rai (optional),
+- latitude/longitude,
+- optional area in rai,
 - timezone,
-- active/inactive state,
+- active state,
 - notes.
 
-The app must support multiple farms at different locations.
+Location should normally be captured from the phone. Manual coordinates remain available.
 
-### 7.3 Weather
+### 6.3 Weather
 
-Use Open-Meteo initially.
+Initial provider: Open-Meteo.
 
-Requirements:
-- current conditions where available,
-- hourly forecast,
-- daily forecast,
-- precipitation probability,
-- precipitation,
-- temperature,
-- humidity where available,
-- wind speed,
-- weather code,
-- retrieval timestamp.
+Store normalized current, hourly and daily data with provider, model where available, forecast time and retrieval time. Cache weather in D1. If refresh fails, keep the last successful snapshot and visibly label it as stale.
 
-Weather should be cached in D1 so opening the app does not always trigger an upstream API request.
+The interface must distinguish:
 
-### 7.4 Farm Rules Engine
+- observed/current model conditions,
+- forecast,
+- farmer-reported actual rain or conditions.
 
-The rules engine evaluates farm tasks against weather data.
+### 6.4 Recommendation Rules
 
-Initial activities:
+Initial rubber activities:
+
 - rubber tapping,
 - fertilizing,
 - spraying,
 - grass cutting,
-- harvesting,
+- harvesting/general outdoor work,
 - equipment inspection.
 
-Rules must be stored/versioned as application configuration or structured definitions so they can evolve without rewriting unrelated UI code.
+Every rule must contain:
 
-Examples:
-- high rain probability may make rubber tapping unsuitable,
-- excessive wind may make spraying unsuitable,
-- severe heat may move outdoor work to caution,
-- recent/expected rain can affect fertilizer recommendations.
+- rule ID and version,
+- crop/activity,
+- input metrics and thresholds,
+- source/reference,
+- reviewer and review date,
+- status output,
+- Thai reason text,
+- limitations,
+- automated tests.
 
-Important: initial thresholds are operational defaults, not agronomic guarantees. They must be reviewed and tuned before being presented as authoritative agricultural advice.
+Operational defaults cannot be labelled as authoritative advice until reviewed and field-tested.
 
-### 7.5 Planner
+### 6.5 Recommendation Feedback
 
-Create planned tasks with:
-- farm,
-- activity type,
-- date,
-- optional start/end time,
-- title,
-- notes,
-- status,
-- optional estimated cost.
+For each recommendation the farmer can record:
 
-Statuses:
-- PLANNED
-- IN_PROGRESS
-- DONE
-- SKIPPED
-- RESCHEDULED
+- followed / did not follow,
+- actual rain or relevant condition,
+- work completed / disrupted,
+- short optional note.
 
-The planner should show weather suitability for the selected date when forecast data is available.
+This feedback is used to measure usefulness and tune later rule versions. It must not silently rewrite rules.
 
-### 7.6 Farm Log
+### 6.6 Planner and Farm Log
 
-A completed activity may record:
-- farm,
-- linked planned task,
-- activity,
-- start/end time,
-- result,
-- notes,
-- quantity and unit where applicable,
-- expense,
-- weather snapshot reference,
-- attachments.
+Tasks support PLANNED, IN_PROGRESS, DONE, SKIPPED and RESCHEDULED.
 
-### 7.7 Notifications
+A completed log may include activity, start/end, result, quantity/unit, expense, weather snapshot, recommendation reference and attachments.
 
-Initial notification transport: ntfy.
+The common path must require minimal typing.
 
-Use cases:
-- important weather warning,
-- tomorrow's work may be unsuitable,
-- upcoming scheduled task,
-- reminder for overdue work.
+### 6.7 Alerts
 
-Notifications should be deduplicated so the same warning is not repeatedly sent without a meaningful change.
+Production alerts should use PWA/Web Push where supported. ntfy may be used for internal testing, not as the required farmer onboarding path.
 
-### 7.8 Attachments
+Alerts must be deduplicated and include farm, affected time, reason and a direct link to the relevant recommendation.
 
-Use Cloudflare R2 for images and future documents.
+### 6.8 Offline/PWA
 
-D1 stores metadata only:
-- object key,
-- media type,
-- related entity,
-- created timestamp,
-- optional caption.
+The app must:
 
-### 7.9 History & Analytics
+- be installable but not require installation,
+- cache the application shell and last useful dashboard,
+- display last-update time and offline state,
+- allow a farm log to be queued locally,
+- synchronize queued records when connectivity returns,
+- avoid duplicate records during retry.
 
-Initial reports:
-- tasks completed per period,
-- pending tasks,
-- expenses by farm/activity/month,
-- days weather disrupted planned work,
-- planned vs completed work.
+### 6.9 Data Ownership
 
-Later analysis may compare forecast/recommendation history with actual farm outcomes.
+The owner can export farms, tasks, logs, expenses and recommendation history as CSV/JSON.
 
-## 8. Non-Functional Requirements
+Production requires documented backup and restore checks. Account/data deletion must be supported before public onboarding.
 
-### Performance
-- Dashboard should render from cached/backend data quickly on mobile networks.
-- Avoid unnecessary upstream weather API calls.
+## 7. Security and Privacy
 
-### Reliability
-- Upstream weather failure must not erase cached data.
-- UI must display the age of stale weather data.
+Before sharing the application:
 
-### Security
-- Do not commit secrets.
-- Environment-specific values must use Worker secrets/bindings.
-- R2 objects should not automatically be public.
+- all farm APIs require authentication,
+- every query is scoped to the authenticated owner,
+- the first owner setup is controlled and later registrations require an invite,
+- sessions use secure HttpOnly cookies and can be revoked,
+- passwords/PINs are never stored in plaintext,
+- state-changing requests include origin/CSRF protection,
+- inputs are validated server-side,
+- R2 objects remain private,
+- login and sensitive operations are rate-limited,
+- secrets are stored only in Cloudflare/GitHub secret systems.
 
-### Accessibility / Readability
-- Base mobile text should be comfortably readable.
-- Critical statuses cannot rely on color alone; use icons/text labels too.
-- Touch targets should be suitable for field use.
+## 8. Technical Architecture
 
-### Cost
-- Architecture should remain within free tiers for normal personal use whenever practical.
+- Cloudflare Worker + Static Assets/PWA
+- Cloudflare D1 for accounts, farms, weather, rules, tasks, logs and audit data
+- Cloudflare R2 for private images
+- Open-Meteo for initial forecast data
+- Web Push for farmer notifications; ntfy for internal testing only
+- GitHub Actions for checked deployments
+- optional Workers AI after the rules and pilot are proven
 
-## 9. Data Ownership
+The free D1 tier is suitable for the controlled pilot. Storage and request usage must be measured before broader rollout.
 
-FarmPulse records should be exportable later in structured formats such as CSV/JSON.
+## 9. Reliability Requirements
 
-The database schema must avoid provider-specific lock-in where reasonable.
+- cached weather survives upstream failure,
+- mutations are idempotent where retries are possible,
+- migration and rollback procedures are documented,
+- health checks cover runtime and database,
+- failed scheduled work is observable,
+- the UI presents a recoverable error instead of a blank screen,
+- production changes pass typecheck, automated tests, migration verification and smoke tests.
 
-## 10. Out of Scope for MVP
+## 10. Real-Farmer MVP Acceptance
 
-- marketplace,
-- public social feed,
-- payroll,
-- inventory accounting,
-- complex team permissions,
-- autonomous AI agronomy decisions,
-- commercial multi-tenant SaaS billing.
+The MVP is not accepted until one user can:
 
-## 11. Technical Architecture
+1. create a protected owner account,
+2. create a farm without manually finding coordinates,
+3. reopen the last dashboard on a weak/offline connection,
+4. see real forecast freshness and uncertainty,
+5. see at least three source-traceable rubber recommendations,
+6. plan, complete, skip and reschedule work,
+7. record an actual result/expense with minimal typing,
+8. receive one tested useful alert,
+9. export their own data,
+10. recover gracefully from weather/API failure.
 
-Frontend / Worker runtime:
-- Cloudflare Workers + Static Assets
+## 11. Pilot Validation Gate
 
-Database:
-- Cloudflare D1
+Run a 30-day controlled pilot with 3–5 real rubber farmers before expanding crops.
 
-Object storage:
-- Cloudflare R2
+Track:
 
-Weather:
-- Open-Meteo
+- active days per farmer per week,
+- recommendations viewed and acted on,
+- unsuitable/incorrect recommendations,
+- weather-disrupted work,
+- successful logs without assistance,
+- alert usefulness,
+- continued-use intent after 30 days.
 
-Push notification:
-- ntfy
+Pilot exit criteria:
 
-Source control:
-- GitHub
+- no cross-user data exposure,
+- no unresolved critical data-loss issue,
+- at least 80% of common tasks completed without assistance,
+- recommendation problems are recorded and reviewed,
+- at least 3 of 5 pilot users want to continue,
+- the product demonstrably answers the daily farm-work questions better than a generic forecast alone.
 
-Future optional AI:
-- Cloudflare Workers AI
+## 12. Expansion Gate
 
-## 12. MVP Acceptance Criteria
-
-A usable MVP is reached when a user can:
-1. open FarmPulse on a phone,
-2. create a farm with location,
-3. fetch and view its forecast,
-4. see at least three weather-aware task recommendations,
-5. create a planned task,
-6. mark it completed and create a farm log entry,
-7. review recent history,
-8. receive at least one tested notification flow,
-9. recover gracefully when the weather provider is unavailable.
-
-## 13. Success Criteria
-
-The project succeeds if the application reduces the mental work required to answer:
-- What should I do in the farm today?
-- What should I postpone?
-- What work is coming next?
-- What did I actually do and spend?
-- How often did weather affect my plan?
+Oil palm, additional users/roles, analytics and AI may proceed only after the rubber pilot gate passes. Each new crop requires its own sourced, versioned and field-reviewed rule pack.
