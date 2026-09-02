@@ -1,7 +1,7 @@
 name = "farmpulse"
 main = "src/index.ts"
 compatibility_date = "2026-09-01"
-account_id = "2addc1ce7db4af91c9067ee2a8bba7f0"
+account_id = "793f6dc7afb275fb3d03c869b1570a1a"
 
 [vars]
 APP_NAME = "FarmPulse"
