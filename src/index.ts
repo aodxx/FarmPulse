@@ -177,7 +177,7 @@ async function handleDefaultFarm(request: Request, env: Env): Promise<Response> 
   return apiError(405, "METHOD_NOT_ALLOWED", "Method not allowed");
 }
 
-const landingPage = \`<!doctype html>
+const landingPage = `<!doctype html>
 <html lang="th">
 <head>
 <meta charset="utf-8">
@@ -281,7 +281,7 @@ load();
 })();
 </script>
 </body>
-</html>\`;
+</html>`;
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
