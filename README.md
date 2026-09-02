@@ -2,6 +2,13 @@
 
 FarmPulse is a mobile-first farm work planner that turns weather data into practical farm recommendations.
 
+## Live Application
+
+- App: https://farmpulse.farmpulse-aodxx-th.workers.dev
+- Health check: https://farmpulse.farmpulse-aodxx-th.workers.dev/api/health
+- Runtime: Cloudflare Workers
+- Environment: production
+
 ## Goal
 
 Convert weather forecasts into clear actions for farm work such as rubber tapping, fertilizing, spraying, grass cutting, harvesting, and equipment checks.
@@ -35,8 +42,8 @@ FarmPulse is not a generic weather app. Every forecast must be translated into a
 
 ## Development Phases
 
-- Phase 0 — Foundation
-- Phase 1 — Worker Hello World
+- Phase 0 — Foundation ✅
+- Phase 1 — Worker Hello World ✅
 - Phase 2 — D1 database
 - Phase 3 — Open-Meteo integration
 - Phase 4 — Farm Rules Engine

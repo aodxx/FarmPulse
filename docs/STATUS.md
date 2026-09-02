@@ -1,10 +1,10 @@
 # FarmPulse Project Status
 
-Last updated: 2026-09-01
+Last updated: 2026-09-02
 
 ## Current Phase
 
-Phase 0 — Foundation
+Phase 1 — Initial Cloudflare Worker deployment complete
 
 ## Completed
 
@@ -15,17 +15,29 @@ Phase 0 — Foundation
 - Development roadmap defined
 - Initial Cloudflare Worker shell created
 - `/api/health` endpoint implemented
-- D1 schema designed
-- D1 indexes added for core query paths
+- D1 schema and core indexes designed
 - Rules engine domain types created
 - Wrangler and TypeScript configuration added
 - Secret/local file exclusions added
+- GitHub Actions deployment connected to `Aodaod3826@gmail.com's Account`
+- Cloudflare agent tracing enabled
+- Account `workers.dev` subdomain registered
+- Worker deployed to production
+- Landing page verified with HTTP 200
+- Health endpoint verified with HTTP 200 JSON
+- No secret values committed
+
+## Production
+
+- Application: https://farmpulse.farmpulse-aodxx-th.workers.dev
+- Health: https://farmpulse.farmpulse-aodxx-th.workers.dev/api/health
+- Worker: `farmpulse`
+- Version: `0.1.0`
+- Environment: `production`
+- Cloudflare version ID: `75427ebe-48d2-4616-af8f-214a801347f1`
 
 ## Not Yet Connected
 
-The following external resources have not yet been provisioned or bound:
-
-- Cloudflare Worker deployment
 - Cloudflare D1 database
 - Cloudflare R2 bucket
 - Open-Meteo runtime integration
@@ -34,11 +46,4 @@ The following external resources have not yet been provisioned or bound:
 
 ## Next Milestone
 
-Phase 1 — deploy the initial Worker and verify:
-
-1. FarmPulse public URL loads.
-2. `/api/health` returns HTTP 200 JSON.
-3. Wrangler configuration is bound to the intended Cloudflare account.
-4. No secrets are committed to GitHub.
-
-After Phase 1 passes, create `farmpulse-db` in Cloudflare D1 and proceed to Phase 2.
+Phase 2 — create and bind Cloudflare D1 database `farmpulse-db`, apply `db/schema.sql`, and verify the first database-backed health check.
