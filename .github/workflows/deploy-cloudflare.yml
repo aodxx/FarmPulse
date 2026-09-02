@@ -75,7 +75,7 @@ jobs:
           node -e '
             const payload = JSON.parse(process.argv[1]);
             const count = payload[0]?.results?.[0]?.table_count ?? 0;
-            if (count < 7) throw new Error(`Expected at least 7 application tables, found ${count}`);
+            if (count < 14) throw new Error(`Expected at least 14 application tables, found ${count}`);
             console.log(`Verified ${count} D1 application tables.`);
           ' "$result"
         env:
@@ -94,3 +94,26 @@ jobs:
             https://farmpulse.farmpulse-aodxx-th.workers.dev/api/health
           curl --silent --show-error --fail-with-body \
             https://farmpulse.farmpulse-aodxx-th.workers.dev/api/db/health
+
+          auth_status="$(curl --silent --show-error --fail-with-body \
+            https://farmpulse.farmpulse-aodxx-th.workers.dev/api/auth/status)"
+          node -e '
+            const status = JSON.parse(process.argv[1]);
+            if (!status.ok || status.authenticated !== false) {
+              throw new Error("Unexpected public auth status");
+            }
+            console.log("Verified public auth status.");
+          ' "$auth_status"
+
+          anonymous_code="$(curl --silent --output /tmp/farmpulse-anonymous.json \
+            --write-out "%{http_code}" \
+            https://farmpulse.farmpulse-aodxx-th.workers.dev/api/farms)"
+          if [ "$anonymous_code" != "401" ]; then
+            cat /tmp/farmpulse-anonymous.json
+            echo "Expected anonymous farm request to return 401, received $anonymous_code" >&2
+            exit 1
+          fi
+          echo "Verified anonymous farm data is protected."
+
+          curl --silent --show-error --fail-with-body \
+            https://farmpulse.farmpulse-aodxx-th.workers.dev/manifest.webmanifest >/dev/null
