@@ -1,3 +1,5 @@
+import { authPage, getSessionUser, handleAuth, sameOrigin, type SessionUser } from "./auth";
+
 export interface Env {
   APP_NAME: string;
   APP_VERSION: string;
@@ -55,20 +57,20 @@ const optionalText = (value: unknown, max: number) => {
 const finiteNumber = (value: unknown) =>
   typeof value === "number" && Number.isFinite(value) ? value : null;
 
-async function getFarm(db: D1Database, id: string): Promise<FarmRow | null> {
-  return db.prepare("SELECT * FROM farms WHERE id = ?1").bind(id).first<FarmRow>();
+async function getFarm(db: D1Database, id: string, userId: string): Promise<FarmRow | null> {
+  return db.prepare("SELECT * FROM farms WHERE id = ?1 AND owner_user_id = ?2").bind(id, userId).first<FarmRow>();
 }
 
-async function handleFarms(request: Request, env: Env, farmId?: string): Promise<Response> {
+async function handleFarms(request: Request, env: Env, user: SessionUser, farmId?: string): Promise<Response> {
   if (request.method === "GET" && !farmId) {
     const activeOnly = new URL(request.url).searchParams.get("active") !== "all";
     const query = activeOnly
-      ? "SELECT * FROM farms WHERE is_active = 1 ORDER BY created_at DESC"
-      : "SELECT * FROM farms ORDER BY created_at DESC";
-    const result = await env.DB.prepare(query).all<FarmRow>();
+      ? "SELECT * FROM farms WHERE owner_user_id = ?1 AND is_active = 1 ORDER BY created_at DESC"
+      : "SELECT * FROM farms WHERE owner_user_id = ?1 ORDER BY created_at DESC";
+    const result = await env.DB.prepare(query).bind(user.id).all<FarmRow>();
     const defaultFarm = await env.DB.prepare(
-      "SELECT value FROM app_settings WHERE key = 'default_farm_id'",
-    ).first<{ value: string }>();
+      "SELECT value FROM user_settings WHERE user_id = ?1 AND key = 'default_farm_id'",
+    ).bind(user.id).first<{ value: string }>();
     return json({
       ok: true,
       farms: result.results.map(farmResponse),
@@ -77,7 +79,7 @@ async function handleFarms(request: Request, env: Env, farmId?: string): Promise
   }
 
   if (request.method === "GET" && farmId) {
-    const farm = await getFarm(env.DB, farmId);
+    const farm = await getFarm(env.DB, farmId, user.id);
     return farm
       ? json({ ok: true, farm: farmResponse(farm) })
       : apiError(404, "FARM_NOT_FOUND", "Farm not found");
@@ -106,21 +108,21 @@ async function handleFarms(request: Request, env: Env, farmId?: string): Promise
 
     const id = crypto.randomUUID();
     await env.DB.prepare(
-      `INSERT INTO farms (id, name, crop_type, latitude, longitude, area_rai, timezone, notes)
-       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)`,
-    ).bind(id, name, cropType, latitude, longitude, areaRai, timezone, notes).run();
-    const count = await env.DB.prepare("SELECT COUNT(*) AS count FROM farms").first<{ count: number }>();
+      `INSERT INTO farms (id, name, crop_type, latitude, longitude, area_rai, timezone, notes, owner_user_id)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)`,
+    ).bind(id, name, cropType, latitude, longitude, areaRai, timezone, notes, user.id).run();
+    const count = await env.DB.prepare("SELECT COUNT(*) AS count FROM farms WHERE owner_user_id = ?1").bind(user.id).first<{ count: number }>();
     if (count?.count === 1) {
       await env.DB.prepare(
-        `INSERT INTO app_settings (key, value) VALUES ('default_farm_id', ?1)
-         ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP`,
-      ).bind(id).run();
+        `INSERT INTO user_settings (user_id, key, value) VALUES (?1, 'default_farm_id', ?2)
+         ON CONFLICT(user_id, key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP`,
+      ).bind(user.id, id).run();
     }
-    return json({ ok: true, farm: farmResponse((await getFarm(env.DB, id))!) }, { status: 201 });
+    return json({ ok: true, farm: farmResponse((await getFarm(env.DB, id, user.id))!) }, { status: 201 });
   }
 
   if (request.method === "PATCH" && farmId) {
-    const current = await getFarm(env.DB, farmId);
+    const current = await getFarm(env.DB, farmId, user.id);
     if (!current) return apiError(404, "FARM_NOT_FOUND", "Farm not found");
     const next = {
       name: body.name === undefined ? current.name : requiredText(body.name, 120),
@@ -146,32 +148,32 @@ async function handleFarms(request: Request, env: Env, farmId?: string): Promise
     await env.DB.prepare(
       `UPDATE farms SET name = ?1, crop_type = ?2, latitude = ?3, longitude = ?4,
        area_rai = ?5, timezone = ?6, notes = ?7, is_active = ?8, updated_at = CURRENT_TIMESTAMP
-       WHERE id = ?9`,
-    ).bind(next.name, next.cropType, next.latitude, next.longitude, next.areaRai, next.timezone, next.notes, next.isActive, farmId).run();
-    return json({ ok: true, farm: farmResponse((await getFarm(env.DB, farmId))!) });
+       WHERE id = ?9 AND owner_user_id = ?10`,
+    ).bind(next.name, next.cropType, next.latitude, next.longitude, next.areaRai, next.timezone, next.notes, next.isActive, farmId, user.id).run();
+    return json({ ok: true, farm: farmResponse((await getFarm(env.DB, farmId, user.id))!) });
   }
 
   return apiError(405, "METHOD_NOT_ALLOWED", "Method not allowed");
 }
 
-async function handleDefaultFarm(request: Request, env: Env): Promise<Response> {
+async function handleDefaultFarm(request: Request, env: Env, user: SessionUser): Promise<Response> {
   if (request.method === "GET") {
     const setting = await env.DB.prepare(
-      "SELECT value FROM app_settings WHERE key = 'default_farm_id'",
-    ).first<{ value: string }>();
-    const farm = setting?.value ? await getFarm(env.DB, setting.value) : null;
+      "SELECT value FROM user_settings WHERE user_id = ?1 AND key = 'default_farm_id'",
+    ).bind(user.id).first<{ value: string }>();
+    const farm = setting?.value ? await getFarm(env.DB, setting.value, user.id) : null;
     return json({ ok: true, default_farm_id: setting?.value ?? null, farm: farm ? farmResponse(farm) : null });
   }
   if (request.method === "PUT") {
     const body = await bodyAsObject(request);
     const farmId = body && requiredText(body.farm_id, 80);
     if (!farmId) return apiError(422, "VALIDATION_ERROR", "farm_id is required");
-    const farm = await getFarm(env.DB, farmId);
+    const farm = await getFarm(env.DB, farmId, user.id);
     if (!farm || farm.is_active !== 1) return apiError(404, "FARM_NOT_FOUND", "Active farm not found");
     await env.DB.prepare(
-      `INSERT INTO app_settings (key, value) VALUES ('default_farm_id', ?1)
-       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP`,
-    ).bind(farmId).run();
+      `INSERT INTO user_settings (user_id, key, value) VALUES (?1, 'default_farm_id', ?2)
+       ON CONFLICT(user_id, key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP`,
+    ).bind(user.id, farmId).run();
     return json({ ok: true, default_farm_id: farmId, farm: farmResponse(farm) });
   }
   return apiError(405, "METHOD_NOT_ALLOWED", "Method not allowed");
@@ -295,12 +297,25 @@ export default {
         const tables = await env.DB.prepare("SELECT COUNT(*) AS count FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'").first<{ count: number }>();
         return json({ ok: database?.connected === 1, database: "connected", tables: tables?.count ?? 0 });
       }
-      if (url.pathname === "/api/farms") return handleFarms(request, env);
+      if (url.pathname.startsWith("/api/auth/")) return handleAuth(request, env, url.pathname);
+
+      const user = await getSessionUser(request, env);
+      if (!user) {
+        if (url.pathname.startsWith("/api/")) {
+          return apiError(401, "AUTH_REQUIRED", "กรุณาเข้าสู่ระบบ FarmPulse");
+        }
+        return new Response(authPage, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
+      }
+      if (request.method !== "GET" && request.method !== "HEAD" && !sameOrigin(request)) {
+        return apiError(403, "INVALID_ORIGIN", "คำขอนี้ไม่ได้มาจาก FarmPulse");
+      }
+
+      if (url.pathname === "/api/farms") return handleFarms(request, env, user);
       const farmMatch = url.pathname.match(/^\/api\/farms\/([0-9a-f-]+)$/i);
-      if (farmMatch) return handleFarms(request, env, farmMatch[1]);
-      if (url.pathname === "/api/settings/default-farm") return handleDefaultFarm(request, env);
+      if (farmMatch) return handleFarms(request, env, user, farmMatch[1]);
+      if (url.pathname === "/api/settings/default-farm") return handleDefaultFarm(request, env, user);
       if (url.pathname.startsWith("/api/")) return apiError(404, "NOT_FOUND", "FarmPulse API route not found");
-      return new Response(landingPage, { headers: { "content-type": "text/html; charset=utf-8" } });
+      return new Response(landingPage, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
     } catch (error) {
       console.error("Unhandled request error", error);
       return apiError(500, "INTERNAL_ERROR", "FarmPulse could not complete this request");
