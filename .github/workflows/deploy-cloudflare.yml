@@ -27,6 +27,20 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Ensure workers.dev subdomain
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: 2addc1ce7db4af91c9067ee2a8bba7f0
+        run: |
+          set -euo pipefail
+          response="$(curl --silent --show-error --fail-with-body \
+            --request PUT \
+            --url "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/subdomain" \
+            --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            --header "Content-Type: application/json" \
+            --data '{"subdomain":"farmpulse-aodxx-th"}')"
+          node -e 'const result = JSON.parse(process.argv[1]); if (!result.success) { console.error(result.errors); process.exit(1); }' "$response"
+
       - name: Deploy Worker
         run: npm run deploy
         env:
