@@ -2,59 +2,65 @@
 
 Last updated: 2026-09-02
 
+## Product Direction
+
+FarmPulse has been reset from a free-service experiment into a controlled real-farmer product.
+
+First validated user:
+
+- Southern Thailand rubber farmer,
+- 1–3 farms,
+- Android/mobile browser,
+- weak-connectivity capable,
+- Thai, large and direct field UX.
+
+Oil palm remains in the data model but crop advice will not launch until separately validated.
+
 ## Current Phase
 
-Phase 2 — D1 database implementation ready for production provisioning
+Phase 2.5 — Production Safety Gate
 
-## Completed
+## Completed in Production
 
-- Repository initialized
-- Product vision defined
-- PRD created
-- Architecture documented
-- Development roadmap defined
-- Initial Cloudflare Worker shell created
-- `/api/health` endpoint implemented
-- D1 schema and core indexes designed
-- Rules engine domain types created
-- Wrangler and TypeScript configuration added
-- Secret/local file exclusions added
-- GitHub Actions deployment connected to `Aodaod3826@gmail.com's Account`
-- Cloudflare agent tracing enabled
-- Account `workers.dev` subdomain registered
-- Worker deployed to production
-- Landing page verified with HTTP 200
-- Health endpoint verified with HTTP 200 JSON
-- No secret values committed
-- Versioned D1 migration `0001_initial.sql` added
-- D1 binding configuration and idempotent CI provisioning added
-- Local migration verified successfully (21 SQL commands)
-- Farm create/list/read/update API implemented with validation and prepared statements
-- Default farm selection API implemented
-- Database-backed `/api/db/health` endpoint implemented
-- Remote migration, schema verification, deploy, and health checks added to GitHub Actions
+- Cloudflare Worker and GitHub Actions deployment
+- Cloudflare D1 database `farmpulse-db`
+- versioned migration `0001_initial.sql`
+- 10 verified D1 application tables
+- farm create/list/read/update API
+- default farm selection
+- mobile FarmPulse dashboard and farm setup
+- production and database health checks
+- version 0.2.0 production runtime
+- Cloudflare observability/tracing
+
+## Product Reset Completed
+
+- PRD v2.0 defines a real-farmer outcome
+- rubber-first pilot target
+- authentication and ownership gate
+- PWA/offline requirements
+- sourced/versioned rule governance
+- recommendation feedback
+- CSV/JSON ownership requirements
+- 30-day pilot with measurable exit criteria
+- PWA/Web Push preferred over farmer-facing ntfy setup
+
+## Blocking Before Phase 3
+
+- owner authentication
+- per-owner data isolation
+- protected APIs
+- PWA/offline shell
+- export and backup foundation
+- automated ownership/security tests
 
 ## Production
 
-- Application: https://farmpulse.farmpulse-aodxx-th.workers.dev
+- App: https://farmpulse.farmpulse-aodxx-th.workers.dev
 - Health: https://farmpulse.farmpulse-aodxx-th.workers.dev/api/health
-- Worker: `farmpulse`
-- Version: `0.2.0` (pending Phase 2 production deployment)
-- Environment: `production`
-- Cloudflare version ID: `75427ebe-48d2-4616-af8f-214a801347f1`
-
-## Awaiting Production Verification
-
-- Cloudflare D1 database creation using the connected account
-- Remote migration and database-backed health check
-
-## Not Yet Connected
-
-- Cloudflare R2 bucket
-- Open-Meteo runtime integration
-- ntfy topic/notification flow
-- Workers AI
+- Database health: https://farmpulse.farmpulse-aodxx-th.workers.dev/api/db/health
+- Environment: production
 
 ## Next Milestone
 
-Complete the Phase 2 production run, verify the D1 database and indexes, then create and retrieve the first real farm record before closing Phase 2.
+Complete Phase 2.5 and verify that farm data is private and the app remains useful under weak connectivity. Only then start Phase 3 weather integration.
