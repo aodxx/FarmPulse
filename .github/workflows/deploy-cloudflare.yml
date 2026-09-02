@@ -31,4 +31,4 @@ jobs:
         run: npm run deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: 793f6dc7afb275fb3d03c869b1570a1a
+          CLOUDFLARE_ACCOUNT_ID: 2addc1ce7db4af91c9067ee2a8bba7f0
